@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import App from './App';
 import './index.css';
+import './styles/global.less';
 
 // 配置 dayjs 使用中文
 dayjs.locale('zh-cn');

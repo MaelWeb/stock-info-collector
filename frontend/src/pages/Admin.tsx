@@ -6,7 +6,6 @@ import {
   Space,
   Modal,
   Form,
-  Input,
   Select,
   Switch,
   message,
@@ -14,7 +13,6 @@ import {
   Tag,
   Popconfirm,
   InputNumber,
-  DatePicker,
 } from 'antd';
 import {
   UserOutlined,
@@ -25,7 +23,6 @@ import {
   EditOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
-import * as authAPI from '../api/authAPI';
 import { User, InviteCode } from '../types/user';
 
 const { TabPane } = Tabs;

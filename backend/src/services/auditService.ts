@@ -31,10 +31,10 @@ export class AuditService {
           userId,
           action,
           resource,
-          resourceId,
+          resourceId: resourceId ?? null,
           details: details ? JSON.stringify(details) : null,
-          ipAddress,
-          userAgent,
+          ipAddress: ipAddress ?? null,
+          userAgent: userAgent ?? null,
         },
       });
     } catch (error) {
@@ -129,7 +129,7 @@ export class AuditService {
       adminUserId,
       'CREATE',
       'INVITE_CODE',
-      null,
+      undefined,
       { codes, count: codes.length },
       ipAddress,
       userAgent

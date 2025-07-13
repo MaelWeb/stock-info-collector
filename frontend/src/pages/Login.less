@@ -1,0 +1,311 @@
+// ======================================================================
+// == 登录页面样式 ==
+// ======================================================================
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  .login-container {
+    display: flex;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 1000px;
+    min-height: 600px;
+
+    .login-left {
+      flex: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .login-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        color: white;
+
+        .logo-section {
+          margin-bottom: 60px;
+
+          .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 36px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+          }
+
+          .app-title {
+            color: white;
+            margin: 0 0 12px 0;
+            font-size: 32px;
+            font-weight: 700;
+          }
+
+          .app-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            margin: 0;
+          }
+        }
+
+        .features-section {
+          .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            .feature-icon {
+              font-size: 24px;
+              color: rgba(255, 255, 255, 0.9);
+              flex-shrink: 0;
+            }
+
+            .feature-content {
+              text-align: left;
+
+              .ant-typography {
+                display: block;
+                margin: 0;
+
+                &.ant-typography-strong {
+                  color: white;
+                  font-size: 16px;
+                  font-weight: 600;
+                  margin-bottom: 4px;
+                }
+
+                &.ant-typography-secondary {
+                  color: rgba(255, 255, 255, 0.7);
+                  font-size: 14px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .login-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+
+      .login-form-container {
+        width: 100%;
+        max-width: 400px;
+
+        .form-header {
+          text-align: center;
+          margin-bottom: 32px;
+
+          .form-title {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: #262626;
+          }
+
+          .form-subtitle {
+            color: #8c8c8c;
+            font-size: 16px;
+            margin: 0;
+          }
+        }
+
+        .register-link {
+          text-align: center;
+          margin-top: 24px;
+
+          .ant-typography {
+            color: #8c8c8c;
+            margin-right: 8px;
+          }
+
+          .link-button {
+            padding: 0;
+            height: auto;
+            font-weight: 500;
+            color: #1890ff;
+
+            &:hover {
+              color: #40a9ff;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .login-page {
+    padding: 0;
+
+    .login-container {
+      flex-direction: column;
+      border-radius: 0;
+      min-height: 100vh;
+
+      .login-left {
+        padding: 40px 20px;
+
+        .login-content {
+          .logo-section {
+            margin-bottom: 40px;
+
+            .logo-icon {
+              width: 60px;
+              height: 60px;
+              font-size: 28px;
+            }
+
+            .app-title {
+              font-size: 24px;
+            }
+
+            .app-subtitle {
+              font-size: 14px;
+            }
+          }
+
+          .features-section {
+            .feature-item {
+              padding: 12px;
+              margin-bottom: 16px;
+
+              .feature-icon {
+                font-size: 20px;
+              }
+
+              .feature-content {
+                .ant-typography {
+                  &.ant-typography-strong {
+                    font-size: 14px;
+                  }
+
+                  &.ant-typography-secondary {
+                    font-size: 12px;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .login-right {
+        padding: 40px 20px;
+
+        .login-form-container {
+          .form-header {
+            margin-bottom: 24px;
+
+            .form-title {
+              font-size: 24px;
+            }
+
+            .form-subtitle {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .login-page {
+    .login-container {
+      .login-left {
+        padding: 30px 16px;
+
+        .login-content {
+          .logo-section {
+            margin-bottom: 30px;
+
+            .logo-icon {
+              width: 50px;
+              height: 50px;
+              font-size: 24px;
+            }
+
+            .app-title {
+              font-size: 20px;
+            }
+
+            .app-subtitle {
+              font-size: 12px;
+            }
+          }
+
+          .features-section {
+            .feature-item {
+              padding: 10px;
+              margin-bottom: 12px;
+
+              .feature-icon {
+                font-size: 18px;
+              }
+            }
+          }
+        }
+      }
+
+      .login-right {
+        padding: 30px 16px;
+
+        .login-form-container {
+          .form-header {
+            .form-title {
+              font-size: 20px;
+            }
+
+            .form-subtitle {
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

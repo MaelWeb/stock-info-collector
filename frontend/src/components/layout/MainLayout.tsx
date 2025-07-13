@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography, Badge, Tooltip } from 'antd';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -11,13 +11,16 @@ import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
+  BellOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { MenuProps } from 'antd';
 import { useAuthStore } from '../../store/authStore';
+import './MainLayout.less';
 
 const { Header, Sider, Content } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 /**
  * @description 主布局组件，提供侧边栏导航和顶部栏
@@ -138,83 +141,109 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout
+      className='main-layout'
+      hasSider>
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
-        style={{
-          background: '#fff',
-          boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)',
-        }}>
-        <div style={{ padding: '16px', textAlign: 'center' }}>
-          <Title
-            level={4}
-            style={{ margin: 0, color: '#1890ff' }}>
-            {collapsed ? 'SIC' : '股票信息收集器'}
-          </Title>
+        className='main-sider'
+        width={280}>
+        <div className='sider-header'>
+          <div className='logo-container'>
+            <div className='logo-icon'>
+              <GlobalOutlined />
+            </div>
+            {!collapsed && (
+              <Title
+                level={4}
+                className='logo-text'>
+                股票信息收集器
+              </Title>
+            )}
+          </div>
         </div>
         <Menu
           mode='inline'
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={handleMenuClick}
-          style={{ borderRight: 0 }}
+          className='main-menu'
         />
       </Sider>
-      <Layout>
-        <Header
-          style={{
-            padding: '0 24px',
-            background: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxShadow: '0 1px 4px rgba(0,21,41,.08)',
-          }}>
-          <Button
-            type='text'
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
-            }}
-          />
-          <Space>
+      <Layout className={`main-content-layout ${collapsed ? 'sider-collapsed' : ''}`}>
+        <Header className='main-header'>
+          <div className='header-left'>
+            <Button
+              type='text'
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              className='menu-trigger'
+            />
+            <div className='breadcrumb'>
+              <Text className='current-page'>
+                {(menuItems.find((item) => item?.key === location.pathname) as any)?.label || '首页'}
+              </Text>
+            </div>
+          </div>
+          <div className='header-right'>
             {isAuthenticated ? (
-              <Dropdown
-                menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
-                placement='bottomRight'>
-                <Space style={{ cursor: 'pointer' }}>
-                  <Avatar icon={<UserOutlined />} />
-                  <span>{user?.name || '用户'}</span>
-                </Space>
-              </Dropdown>
+              <Space size='large'>
+                <Tooltip title='通知'>
+                  <Badge
+                    count={3}
+                    size='small'>
+                    <Button
+                      type='text'
+                      icon={<BellOutlined />}
+                      className='header-action-btn'
+                    />
+                  </Badge>
+                </Tooltip>
+                <Dropdown
+                  menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
+                  placement='bottomRight'
+                  trigger={['click']}>
+                  <div className='user-profile'>
+                    <Avatar
+                      size={36}
+                      icon={<UserOutlined />}
+                      className='user-avatar'
+                    />
+                    {!collapsed && (
+                      <div className='user-info'>
+                        <Text strong>{user?.name || '用户'}</Text>
+                        <Text
+                          type='secondary'
+                          className='user-role'>
+                          {user?.role === 'admin' ? '管理员' : user?.role === 'super_admin' ? '超级管理员' : '普通用户'}
+                        </Text>
+                      </div>
+                    )}
+                  </div>
+                </Dropdown>
+              </Space>
             ) : (
               <Space>
                 <Button
                   type='link'
-                  onClick={() => navigate('/login')}>
+                  onClick={() => navigate('/login')}
+                  className='auth-btn'>
                   登录
                 </Button>
                 <Button
                   type='primary'
-                  onClick={() => navigate('/register')}>
+                  onClick={() => navigate('/register')}
+                  className='auth-btn'>
                   注册
                 </Button>
               </Space>
             )}
-          </Space>
+          </div>
         </Header>
-        <Content
-          style={{
-            margin: 0,
-            minHeight: 280,
-            background: '#f5f5f5',
-          }}>
-          {children}
+        <Content className='main-content'>
+          <div className='content-wrapper'>{children}</div>
         </Content>
       </Layout>
     </Layout>
