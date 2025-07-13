@@ -221,6 +221,9 @@ deploy_services() {
   if [[ -d ".git" ]]; then
     log "拉取最新代码..."
     git pull origin main
+  else
+    warn "Git 仓库不存在，请确保在正确的项目目录中运行此脚本"
+    exit 1
   fi
 
   # 构建镜像

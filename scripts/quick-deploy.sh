@@ -106,6 +106,12 @@ deploy_app() {
   # 如果目录为空，克隆代码
   if [[ ! -d ".git" ]]; then
     log "克隆代码..."
+    # 如果目录不为空，先备份现有文件
+    if [[ "$(ls -A)" ]]; then
+      warn "目录不为空，备份现有文件..."
+      mkdir -p ../backup_$(date +%Y%m%d_%H%M%S)
+      mv * ../backup_$(date +%Y%m%d_%H%M%S)/ 2>/dev/null || true
+    fi
     git clone https://github.com/MaelWeb/stock-info-collector.git .
   else
     log "更新代码..."

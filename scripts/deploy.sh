@@ -188,6 +188,14 @@ clone_code() {
   fi
 
   cd $APP_DIR
+
+  # 如果目录不为空，先备份现有文件
+  if [[ "$(ls -A)" ]]; then
+    warn "目录不为空，备份现有文件..."
+    mkdir -p ../backup_$(date +%Y%m%d_%H%M%S)
+    mv * ../backup_$(date +%Y%m%d_%H%M%S)/ 2>/dev/null || true
+  fi
+
   git clone https://github.com/MaelWeb/stock-info-collector.git .
 }
 
