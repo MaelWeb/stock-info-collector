@@ -141,7 +141,12 @@ deploy_app() {
 
   # 检查内存并选择构建方式
   TOTAL_MEM=$(free -m | awk 'NR==2{printf "%.0f", $2}')
-  if [[ $TOTAL_MEM -lt 1024 ]]; then
+  if [[ $TOTAL_MEM -lt 512 ]]; then
+    log "检测到极低内存环境，使用紧急构建..."
+    cd ..
+    ./scripts/emergency-build.sh
+    cd frontend
+  elif [[ $TOTAL_MEM -lt 1024 ]]; then
     log "检测到低内存环境，使用低内存构建..."
     npm run build:low-memory
   else
