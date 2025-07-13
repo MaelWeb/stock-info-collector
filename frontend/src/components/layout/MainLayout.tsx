@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography } from 'antd';
 import {
   MenuFoldOutlined,
@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { MenuProps } from 'antd';
+import { useAuthStore } from '../../store/authStore';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -29,6 +30,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
+  const fetchUser = useAuthStore((s) => s.fetchUser);
+
+  // 检查是否为管理员
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+
+  // 初始化时获取用户信息
+  useEffect(() => {
+    if (isAuthenticated && !user) {
+      fetchUser();
+    }
+  }, [isAuthenticated, user]);
 
   /**
    * @description 导航菜单项配置
@@ -59,6 +74,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       icon: <BarChartOutlined />,
       label: '技术分析',
     },
+    // 管理员菜单
+    ...(isAdmin
+      ? [
+          {
+            key: '/admin',
+            icon: <UserOutlined />,
+            label: '管理后台',
+          },
+        ]
+      : []),
   ];
 
   /**
@@ -98,12 +123,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const handleUserMenuClick = ({ key }: { key: string }) => {
     switch (key) {
       case 'logout':
-        // 处理退出登录
-        localStorage.removeItem('auth_token');
+        logout();
         navigate('/login');
         break;
       case 'profile':
-        // 处理个人资料
+        navigate('/profile');
         break;
       case 'settings':
         // 处理设置
@@ -159,14 +183,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             }}
           />
           <Space>
-            <Dropdown
-              menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
-              placement='bottomRight'>
-              <Space style={{ cursor: 'pointer' }}>
-                <Avatar icon={<UserOutlined />} />
-                <span>用户</span>
+            {isAuthenticated ? (
+              <Dropdown
+                menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
+                placement='bottomRight'>
+                <Space style={{ cursor: 'pointer' }}>
+                  <Avatar icon={<UserOutlined />} />
+                  <span>{user?.name || '用户'}</span>
+                </Space>
+              </Dropdown>
+            ) : (
+              <Space>
+                <Button
+                  type='link'
+                  onClick={() => navigate('/login')}>
+                  登录
+                </Button>
+                <Button
+                  type='primary'
+                  onClick={() => navigate('/register')}>
+                  注册
+                </Button>
               </Space>
-            </Dropdown>
+            )}
           </Space>
         </Header>
         <Content

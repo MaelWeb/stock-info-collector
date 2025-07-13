@@ -208,6 +208,7 @@ async function main() {
       data: {
         email: 'default@example.com',
         name: 'Default User',
+        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.iK8O', // "password123"
       },
     });
     console.log(`✅ Created default user: ${defaultUser.email}`);

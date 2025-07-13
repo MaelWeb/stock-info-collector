@@ -8,12 +8,15 @@ import swaggerUi from '@fastify/swagger-ui';
 import { serverConfig, rateLimitConfig, validateConfig } from './config';
 import { prisma, closePrismaConnection } from './lib/prisma';
 import { schedulerService } from './services/schedulerService';
+import { SuperAdminService } from './services/superAdminService';
 
 // 导入路由
 import stockRoutes from './routes/stocks';
 import recommendationRoutes from './routes/recommendations';
 import watchlistRoutes from './routes/watchlist';
 import analysisRoutes from './routes/analysis';
+import authRoutes from './routes/auth';
+import adminRoutes from './routes/admin';
 
 /**
  * 创建Fastify应用实例
@@ -106,6 +109,8 @@ async function registerRoutes(): Promise<void> {
   });
 
   // API路由
+  await fastify.register(authRoutes, { prefix: '/api/auth' });
+  await fastify.register(adminRoutes, { prefix: '/api/admin' });
   await fastify.register(stockRoutes, { prefix: '/api/stocks' });
   await fastify.register(recommendationRoutes, { prefix: '/api/recommendations' });
   await fastify.register(watchlistRoutes, { prefix: '/api/watchlist' });
@@ -200,6 +205,15 @@ async function startServer(): Promise<void> {
 
     // 启动定时任务服务
     schedulerService.start();
+
+    // 初始化超级管理员
+    console.log('正在初始化超级管理员...');
+    const superAdminResult = await SuperAdminService.initializeSuperAdmin();
+    if (superAdminResult.success) {
+      console.log('✅ 超级管理员初始化成功:', superAdminResult.user?.email);
+    } else {
+      console.log('ℹ️  超级管理员初始化:', superAdminResult.message);
+    }
 
     // 启动服务器
     await fastify.listen({

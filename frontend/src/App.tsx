@@ -8,6 +8,12 @@ import StockList from './pages/StockList';
 import Watchlist from './pages/Watchlist';
 import Recommendations from './pages/Recommendations';
 import Analysis from './pages/Analysis';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
+import Admin from './pages/Admin';
+import { ProtectedRoute } from './components/features/Auth/ProtectedRoute';
+import { AuthInitializer } from './components/features/Auth/AuthInitializer';
 import './App.css';
 
 const { Content } = Layout;
@@ -30,36 +36,121 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AntApp>
-        <Router>
-          <Layout className='app-layout'>
-            <MainLayout>
-              <Content className='app-content'>
-                <Routes>
-                  <Route
-                    path='/'
-                    element={<Dashboard />}
-                  />
-                  <Route
-                    path='/stocks'
-                    element={<StockList />}
-                  />
-                  <Route
-                    path='/watchlist'
-                    element={<Watchlist />}
-                  />
-                  <Route
-                    path='/recommendations'
-                    element={<Recommendations />}
-                  />
-                  <Route
-                    path='/analysis'
-                    element={<Analysis />}
-                  />
-                </Routes>
-              </Content>
-            </MainLayout>
-          </Layout>
-        </Router>
+        <AuthInitializer>
+          <Router>
+            <Routes>
+              {/* 认证相关路由 - 不使用主布局 */}
+              <Route
+                path='/login'
+                element={<Login />}
+              />
+              <Route
+                path='/register'
+                element={<Register />}
+              />
+
+              {/* 受保护的路由 - 使用主布局 */}
+              <Route
+                path='/'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <Dashboard />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/stocks'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <StockList />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/watchlist'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <Watchlist />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/recommendations'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <Recommendations />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/analysis'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <Analysis />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/profile'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <Profile />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path='/admin'
+                element={
+                  <ProtectedRoute>
+                    <Layout className='app-layout'>
+                      <MainLayout>
+                        <Content className='app-content'>
+                          <Admin />
+                        </Content>
+                      </MainLayout>
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
+        </AuthInitializer>
       </AntApp>
     </QueryClientProvider>
   );

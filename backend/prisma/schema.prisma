@@ -17,6 +17,9 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  password  String   // 加密后的密码
+  role      String   @default("user") // 用户角色：user, admin, super_admin
+  isActive  Boolean  @default(true)   // 账号是否激活
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -25,6 +28,9 @@ model User {
   
   // 用户收到的投资建议
   recommendations Recommendation[]
+  
+  // 用户的操作日志
+  auditLogs AuditLog[]
 
   @@map("users")
 }
@@ -144,4 +150,32 @@ model SystemConfig {
   updatedAt   DateTime @updatedAt
 
   @@map("system_configs")
+} 
+
+model InviteCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  used      Boolean  @default(false)
+  usedBy    String?
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+/**
+ * 操作日志模型
+ */
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String   // 操作用户ID
+  action      String   // 操作类型：CREATE, UPDATE, DELETE, LOGIN, LOGOUT等
+  resource    String   // 操作资源：USER, INVITE_CODE, STOCK等
+  resourceId  String?  // 资源ID
+  details     String?  // 操作详情（JSON格式）
+  ipAddress   String?  // IP地址
+  userAgent   String?  // 用户代理
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
 } 

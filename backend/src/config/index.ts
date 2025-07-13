@@ -26,6 +26,15 @@ const envSchema = z.object({
   OLLAMA_BASE_URL: z.string().url().optional(),
   HUGGINGFACE_API_KEY: z.string().optional(),
 
+  // JWT配置
+  JWT_SECRET: z.string().default('your-super-secret-jwt-key-change-in-production'),
+  JWT_EXPIRES_IN: z.string().default('7d'),
+
+  // 超级管理员配置
+  SUPER_ADMIN_EMAIL: z.string().email().optional(),
+  SUPER_ADMIN_PASSWORD: z.string().optional(),
+  SUPER_ADMIN_NAME: z.string().optional(),
+
   // 定时任务配置
   DAILY_ANALYSIS_TIME: z.string().default('0 9 * * *'),
   MARKET_HOURS_START: z.string().default('09:30'),
@@ -151,6 +160,15 @@ export const rateLimitConfig = {
  */
 export const logConfig = {
   level: config.LOG_LEVEL,
+} as const;
+
+/**
+ * 超级管理员配置
+ */
+export const superAdminConfig = {
+  email: config.SUPER_ADMIN_EMAIL,
+  password: config.SUPER_ADMIN_PASSWORD,
+  name: config.SUPER_ADMIN_NAME,
 } as const;
 
 /**
