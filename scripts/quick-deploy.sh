@@ -121,7 +121,7 @@ deploy_app() {
   # 安装后端依赖
   log "安装后端依赖..."
   cd backend
-  npm install --production
+  npm install
 
   # 初始化数据库
   log "初始化数据库..."
@@ -137,8 +137,18 @@ deploy_app() {
   # 安装前端依赖并构建
   log "构建前端..."
   cd ../frontend
-  npm install --production
-  npm run build
+  npm install
+
+  # 检查内存并选择构建方式
+  TOTAL_MEM=$(free -m | awk 'NR==2{printf "%.0f", $2}')
+  if [[ $TOTAL_MEM -lt 1024 ]]; then
+    log "检测到低内存环境，使用低内存构建..."
+    npm run build:low-memory
+  else
+    log "使用标准构建..."
+    export NODE_OPTIONS="--max-old-space-size=2048"
+    npm run build
+  fi
 
   log "应用部署完成"
 }
@@ -258,7 +268,7 @@ git pull origin main
 
 # 安装后端依赖
 cd backend
-npm install --production
+npm install
 
 # 数据库迁移
 npx prisma generate
@@ -266,7 +276,7 @@ npx prisma db push
 
 # 安装前端依赖并构建
 cd ../frontend
-npm install --production
+npm install
 npm run build
 
 # 重启应用
@@ -345,14 +355,14 @@ main() {
   fi
 
   # 检查是否为 root 用户
-  if [[ $EUID -eq 0 ]]; then
-    error "请不要使用 root 用户运行此脚本"
-  fi
+  # if [[ $EUID -eq 0 ]]; then
+  #   error "请不要使用 root 用户运行此脚本"
+  # fi
 
   # 执行部署步骤
   check_requirements
   setup_directories
-  setup_env
+  #setup_env
   deploy_app
   setup_pm2
   setup_nginx

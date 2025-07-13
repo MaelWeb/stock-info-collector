@@ -217,7 +217,17 @@ build_frontend() {
   log "构建前端应用..."
 
   cd $APP_DIR/frontend
-  npm run build
+
+  # 检查内存并选择构建方式
+  TOTAL_MEM=$(free -m | awk 'NR==2{printf "%.0f", $2}')
+  if [[ $TOTAL_MEM -lt 1024 ]]; then
+    log "检测到低内存环境，使用低内存构建..."
+    npm run build:low-memory
+  else
+    log "使用标准构建..."
+    export NODE_OPTIONS="--max-old-space-size=2048"
+    npm run build
+  fi
 
   if [[ ! -d "dist" ]]; then
     error "前端构建失败"
