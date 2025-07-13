@@ -2,6 +2,17 @@
 
 一个基于大模型 API 的智能股票分析系统，每天自动收集和分析股票数据，提供 AI 驱动的投资建议。
 
+## 📋 目录
+
+- [功能特性](#-功能特性)
+- [技术架构](#️-技术架构)
+- [安装和配置](#-安装和配置)
+- [API 文档](#-api-文档)
+- [使用示例](#-使用示例)
+- [部署指南](#-部署指南)
+- [贡献指南](#-贡献指南)
+- [许可证](#-许可证)
+
 ## 🚀 功能特性
 
 ### 核心功能
@@ -58,14 +69,16 @@
 
 ## 📦 安装和配置
 
-### 1. 克隆项目
+### 开发环境
+
+#### 1. 克隆项目
 
 ```bash
 git clone <repository-url>
 cd stock-info-collector
 ```
 
-### 2. 安装依赖
+#### 2. 安装依赖
 
 ```bash
 # 安装所有依赖（推荐）
@@ -76,7 +89,7 @@ npm run install:backend
 npm run install:frontend
 ```
 
-### 3. 环境配置
+#### 3. 环境配置
 
 复制环境变量模板并配置：
 
@@ -110,7 +123,7 @@ HUGGINGFACE_API_KEY=your_huggingface_api_key
 DAILY_ANALYSIS_TIME="0 9 * * *"  # 每天上午9点
 ```
 
-### 4. 数据库初始化
+#### 4. 数据库初始化
 
 ```bash
 # 一键设置（推荐）
@@ -120,7 +133,7 @@ npm run setup
 npm run setup:db
 ```
 
-### 5. 启动服务
+#### 5. 启动服务
 
 ```bash
 # 同时启动前后端（推荐）
@@ -132,6 +145,20 @@ npm run dev:frontend # 前端服务
 ```
 
 前端应用将在 `http://localhost:3000` 启动，后端 API 在 `http://localhost:3001`。
+
+### 生产环境部署
+
+详细的部署指南请参考：[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
+#### 快速部署
+
+```bash
+# 本地编译上传模式（在本地机器上运行，推荐用于低内存服务器）
+./scripts/quick-deploy.sh --local-build
+
+# 服务器编译模式（在服务器上运行，需要足够内存）
+./scripts/quick-deploy.sh --server-build
+```
 
 ## 🔧 API 文档
 
@@ -286,6 +313,18 @@ npx prisma db push   # 推送数据库变更
 - **异步处理**: 使用异步操作提高响应速度
 
 ## 🚀 部署
+
+详细的部署指南请参考：[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
+### 快速部署
+
+```bash
+# 本地编译上传模式（在本地机器上运行，推荐用于低内存服务器）
+./scripts/quick-deploy.sh --local-build
+
+# 服务器编译模式（在服务器上运行，需要足够内存）
+./scripts/quick-deploy.sh --server-build
+```
 
 ### Docker 部署
 

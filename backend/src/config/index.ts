@@ -1,8 +1,11 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // 加载环境变量
-dotenv.config();
+// 优先查找项目根目录的 .env 文件
+const envPath = path.resolve(__dirname, '../../.env');
+dotenv.config({ path: envPath });
 
 /**
  * 环境变量验证模式
