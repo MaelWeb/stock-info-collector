@@ -20,7 +20,7 @@
 
 ```bash
 # 1. 下载脚本
-wget https://raw.githubusercontent.com/your-username/stock-info-collector/main/scripts/quick-deploy.sh
+wget https://raw.githubusercontent.com/MaelWeb/stock-info-collector/main/scripts/quick-deploy.sh
 
 # 2. 修改域名配置
 sed -i 's/your-domain.com/your-actual-domain.com/g' quick-deploy.sh
@@ -34,7 +34,7 @@ chmod +x quick-deploy.sh
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/your-username/stock-info-collector.git
+git clone https://github.com/MaelWeb/stock-info-collector.git
 cd stock-info-collector
 
 # 2. 修改域名配置
@@ -303,9 +303,9 @@ npm cache clean --force
 
 ### 联系信息
 
-- **项目地址**: https://github.com/your-username/stock-info-collector
+- **项目地址**: https://github.com/MaelWeb/stock-info-collector
 - **问题反馈**: 提交 GitHub Issue
-- **文档地址**: https://github.com/your-username/stock-info-collector/wiki
+- **文档地址**: https://github.com/MaelWeb/stock-info-collector/wiki
 
 ### 重要文件位置
 

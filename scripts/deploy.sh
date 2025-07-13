@@ -188,7 +188,7 @@ clone_code() {
   fi
 
   cd $APP_DIR
-  git clone https://github.com/your-username/stock-info-collector.git .
+  git clone https://github.com/MaelWeb/stock-info-collector.git .
 }
 
 # 安装应用依赖

@@ -125,7 +125,7 @@ sudo firewall-cmd --reload
 
 ```bash
 cd /var/www/stock-info-collector
-git clone https://github.com/your-username/stock-info-collector.git .
+git clone https://github.com/MaelWeb/stock-info-collector.git .
 ```
 
 ### 2. 安装依赖
@@ -545,7 +545,7 @@ echo "0 3 * * 0 /usr/bin/apt update && /usr/bin/apt upgrade -y" | sudo crontab -
 
 - **项目维护者**: [Your Name]
 - **邮箱**: [your-email@example.com]
-- **GitHub**: [https://github.com/your-username/stock-info-collector]
+- **GitHub**: [https://github.com/MaelWeb/stock-info-collector]
 
 ### 日志文件位置
 

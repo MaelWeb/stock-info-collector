@@ -106,7 +106,7 @@ deploy_app() {
   # 如果目录为空，克隆代码
   if [[ ! -d ".git" ]]; then
     log "克隆代码..."
-    git clone https://github.com/your-username/stock-info-collector.git .
+    git clone https://github.com/MaelWeb/stock-info-collector.git .
   else
     log "更新代码..."
     git pull origin main
