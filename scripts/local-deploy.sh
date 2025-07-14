@@ -222,6 +222,9 @@ upload_to_server() {
         cd backend
         npm install --production
         
+        # 构建后端项目
+        npm run build
+        
         # 初始化数据库
         npx prisma generate
         npx prisma db push
@@ -243,7 +246,7 @@ upload_to_server() {
 module.exports = {
   apps: [{
     name: 'stock-info-collector-api',
-    script: './backend/src/index.ts',
+    script: './backend/dist/index.js',
     cwd: '/var/www/stock-info-collector/backend',
     instances: 1,
     autorestart: true,

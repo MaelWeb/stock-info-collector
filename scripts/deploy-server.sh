@@ -371,11 +371,16 @@ setup_pm2() {
 
   cd $APP_DIR
 
+  # 先构建后端项目
+  cd backend
+  npm run build
+  cd ..
+
   cat >ecosystem.config.js <<EOF
 module.exports = {
   apps: [{
     name: 'stock-info-collector-api',
-    script: './backend/src/index.ts',
+    script: './dist/index.js',
     cwd: '$APP_DIR/backend',
     instances: 1,
     autorestart: true,

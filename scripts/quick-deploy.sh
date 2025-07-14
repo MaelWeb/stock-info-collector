@@ -357,7 +357,23 @@ setup_directories() {
 setup_env() {
   log "配置环境变量..."
 
-  cat >$APP_DIR/.env <<EOF
+  # 检查是否已存在 .env 文件
+  if [[ -f "$APP_DIR/.env" ]]; then
+    log "检测到现有 .env 文件，保留现有配置..."
+
+    # 检查是否需要更新域名配置
+    if grep -q "CORS_ORIGIN" "$APP_DIR/.env"; then
+      # 更新域名配置
+      sed -i "s|CORS_ORIGIN=.*|CORS_ORIGIN=\"https://$DOMAIN\"|" "$APP_DIR/.env"
+      log "已更新 CORS_ORIGIN 配置为: https://$DOMAIN"
+    else
+      # 添加域名配置
+      echo "CORS_ORIGIN=\"https://$DOMAIN\"" >>"$APP_DIR/.env"
+      log "已添加 CORS_ORIGIN 配置: https://$DOMAIN"
+    fi
+  else
+    log "创建新的 .env 文件..."
+    cat >$APP_DIR/.env <<EOF
 # 数据库配置
 DATABASE_URL="file:./dev.db"
 
@@ -375,6 +391,7 @@ CORS_ORIGIN="https://$DOMAIN"
 # 日志配置
 LOG_LEVEL="info"
 EOF
+  fi
 
   log "环境变量配置完成"
 }
@@ -409,12 +426,24 @@ deploy_app() {
   # 初始化数据库
   log "初始化数据库..."
   npx prisma generate
-  npx prisma db push
 
-  # 创建超级管理员（如果脚本存在）
-  if [[ -f "create-super-admin-config.js" ]]; then
+  # 检查数据库是否存在
+  if [[ ! -f "prisma/dev.db" ]]; then
+    log "创建新数据库..."
+    npx prisma db push
+  else
+    log "检测到现有数据库，执行迁移..."
+    npx prisma db push
+  fi
+
+  # 创建超级管理员（如果脚本存在且数据库是新创建的）
+  if [[ -f "create-super-admin-config.js" && ! -f "prisma/dev.db.backup" ]]; then
     log "创建超级管理员..."
     node create-super-admin-config.js
+    # 标记数据库已初始化
+    cp prisma/dev.db prisma/dev.db.backup
+  else
+    log "跳过超级管理员创建（数据库已存在）"
   fi
 
   # 安装前端依赖并构建
@@ -473,12 +502,24 @@ deploy_from_package() {
   # 初始化数据库
   log "初始化数据库..."
   npx prisma generate
-  npx prisma db push
 
-  # 创建超级管理员（如果脚本存在）
-  if [[ -f "create-super-admin-config.js" ]]; then
+  # 检查数据库是否存在
+  if [[ ! -f "prisma/dev.db" ]]; then
+    log "创建新数据库..."
+    npx prisma db push
+  else
+    log "检测到现有数据库，执行迁移..."
+    npx prisma db push
+  fi
+
+  # 创建超级管理员（如果脚本存在且数据库是新创建的）
+  if [[ -f "create-super-admin-config.js" && ! -f "prisma/dev.db.backup" ]]; then
     log "创建超级管理员..."
     node create-super-admin-config.js
+    # 标记数据库已初始化
+    cp prisma/dev.db prisma/dev.db.backup
+  else
+    log "跳过超级管理员创建（数据库已存在）"
   fi
 
   # 清理部署包
@@ -491,11 +532,15 @@ deploy_from_package() {
 setup_pm2() {
   log "配置 PM2..."
 
+  # 先构建后端项目
+  cd $APP_DIR/backend
+  npm run build
+
   cat >$APP_DIR/ecosystem.config.js <<EOF
 module.exports = {
   apps: [{
     name: 'stock-info-collector-api',
-    script: './backend/src/index.ts',
+    script: './dist/index.js',
     cwd: '$APP_DIR/backend',
     instances: 1,
     autorestart: true,
@@ -526,8 +571,23 @@ EOF
 setup_nginx() {
   log "配置 Nginx..."
 
-  # 创建 Nginx 配置文件
-  sudo tee /etc/nginx/sites-available/$APP_NAME <<EOF
+  # 检查是否已存在 Nginx 配置
+  if [[ -f "/etc/nginx/sites-available/$APP_NAME" ]]; then
+    log "检测到现有 Nginx 配置，更新域名配置..."
+
+    # 备份现有配置
+    sudo cp /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-available/$APP_NAME.backup.$(date +%Y%m%d_%H%M%S)
+
+    # 更新域名配置
+    sudo sed -i "s/server_name .*;/server_name $DOMAIN www.$DOMAIN;/" /etc/nginx/sites-available/$APP_NAME
+    sudo sed -i "s|root .*;|root $APP_DIR/frontend/dist;|" /etc/nginx/sites-available/$APP_NAME
+
+    log "已更新 Nginx 配置中的域名和路径"
+  else
+    log "创建新的 Nginx 配置文件..."
+
+    # 创建 Nginx 配置文件
+    sudo tee /etc/nginx/sites-available/$APP_NAME <<EOF
 server {
     listen 80;
     server_name $DOMAIN www.$DOMAIN;
@@ -565,6 +625,7 @@ server {
     }
 }
 EOF
+  fi
 
   # 启用站点
   sudo ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/

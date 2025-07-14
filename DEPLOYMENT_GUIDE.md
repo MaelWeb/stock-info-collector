@@ -1,165 +1,229 @@
-# 股票信息收集器 - 完整部署指南
+# 股票信息收集器 - 部署指南
 
-## 📋 目录
+## 概述
 
-- [概述](#概述)
-- [部署模式](#部署模式)
-- [系统要求](#系统要求)
-- [快速部署](#快速部署)
-- [详细部署步骤](#详细部署步骤)
-- [服务配置](#服务配置)
-- [SSL 证书配置](#ssl证书配置)
-- [监控和维护](#监控和维护)
-- [更新部署](#更新部署)
-- [故障排除](#故障排除)
-- [脚本说明](#脚本说明)
+本项目提供了两个主要的部署脚本：
 
-## 🎯 概述
+1. **`scripts/quick-deploy.sh`** - 完整部署脚本（首次部署或重新部署）
+2. **`scripts/update-deploy.sh`** - 更新部署脚本（保护现有配置的更新）
 
-本项目提供了两种部署模式，适应不同的服务器环境和需求：
+## 部署模式
 
-1. **本地编译上传模式** - 在本地编译前端，然后上传到服务器部署（推荐用于低内存服务器）
-2. **服务器编译模式** - 在服务器上直接编译和部署（需要足够内存）
+### 1. 本地编译上传模式
 
-## 🚀 部署模式
-
-### 本地编译上传模式
-
-#### 适用场景
-
-- 服务器内存较小（< 2GB）
-- 服务器网络较慢
-- 需要快速部署
-- 本地开发环境配置良好
-
-#### 优势
-
-- 避免服务器内存不足问题
-- 利用本地更快的编译环境
-- 减少服务器负载
-- 更快的部署速度
-
-#### 执行位置
-
-- **在本地机器上**运行 `quick-deploy.sh --local-build`
-
-### 服务器编译模式
-
-#### 适用场景
-
-- 服务器内存充足（> 2GB）
-- 服务器网络良好
-- 需要完整的服务器端构建流程
-
-#### 执行位置
-
-- **在服务器上**运行 `quick-deploy.sh --server-build`
-
-## 🖥️ 系统要求
-
-### 最低配置
-
-- **CPU**: 1 核
-- **内存**: 2GB RAM
-- **存储**: 50GB SSD
-- **操作系统**: Ubuntu 20.04 LTS 或 CentOS 8
-- **网络**: 公网 IP，开放 80/443 端口
-
-### 推荐配置
-
-- **CPU**: 2 核
-- **内存**: 4GB RAM
-- **存储**: 100GB SSD
-- **操作系统**: Ubuntu 22.04 LTS
-- **网络**: 公网 IP，开放 80/443 端口
-
-### 本地环境要求
-
-- Node.js 18+
-- npm
-- SSH 访问服务器权限
-
-## ⚡ 快速部署
-
-### 本地编译上传模式
-
-**在本地机器上**运行，脚本会交互式获取配置信息：
+适用于在本地机器上编译，然后上传到服务器部署。
 
 ```bash
+# 在本地机器上运行
 ./scripts/quick-deploy.sh --local-build
 ```
 
-### 服务器编译模式
+**特点：**
 
-**在服务器上**运行：
+- 在本地编译前端，减少服务器负载
+- 需要配置 SSH 密钥访问服务器
+- 适合内存较小的服务器
+
+### 2. 服务器编译模式
+
+适用于直接在服务器上编译和部署。
 
 ```bash
+# 在服务器上运行
 ./scripts/quick-deploy.sh --server-build
-# 或者直接运行（默认模式）
+# 或者直接运行（默认服务器模式）
 ./scripts/quick-deploy.sh
 ```
 
-## 📦 详细部署步骤
+**特点：**
 
-### 1. 服务器准备
+- 在服务器上直接编译
+- 需要服务器有足够的内存（建议 2GB+）
+- 适合高配置服务器
 
-#### 系统更新
+## 部署脚本详解
+
+### 完整部署脚本 (`quick-deploy.sh`)
+
+#### 功能特性
+
+✅ **智能配置保护**
+
+- 检测现有 `.env` 文件，避免覆盖
+- 只更新必要的配置项（如域名）
+- 保护现有数据库和用户数据
+
+✅ **数据库安全**
+
+- 检测现有数据库，避免重新初始化
+- 只在首次部署时创建超级管理员
+- 使用备份标记避免重复创建
+
+✅ **Nginx 配置保护**
+
+- 检测现有 Nginx 配置
+- 只更新域名和路径配置
+- 自动备份现有配置
+
+✅ **PM2 路径修复**
+
+- 修复了 PM2 启动路径错误
+- 正确的脚本路径：`./src/index.ts`
+
+#### 使用场景
+
+- **首次部署**：全新服务器环境
+- **重新部署**：需要完全重置环境
+- **配置更新**：更新域名等配置
+
+#### 执行流程
+
+1. 交互式配置获取
+2. 系统要求检查
+3. 目录创建
+4. 环境变量配置（保护现有配置）
+5. 代码部署
+6. 数据库初始化（保护现有数据）
+7. PM2 配置
+8. Nginx 配置（保护现有配置）
+9. 管理脚本创建
+10. 部署验证
+
+### 更新部署脚本 (`update-deploy.sh`)
+
+#### 功能特性
+
+✅ **配置文件保护**
+
+- 自动备份现有配置文件
+- 更新后恢复所有配置
+- 保护数据库和用户数据
+
+✅ **增量更新**
+
+- 只更新代码，不重新初始化
+- 保留所有现有配置
+- 自动备份便于回滚
+
+✅ **安全验证**
+
+- 部署前检查现有环境
+- 部署后验证服务状态
+- 详细的错误处理
+
+#### 使用场景
+
+- **代码更新**：获取最新功能
+- **安全补丁**：应用安全更新
+- **性能优化**：部署性能改进
+
+#### 执行流程
+
+1. 检查现有部署
+2. 备份现有部署
+3. 保护配置文件
+4. 更新代码
+5. 更新后端依赖
+6. 更新前端构建
+7. 恢复配置文件
+8. 重启服务
+9. 验证部署
+
+## 部署前准备
+
+### 服务器要求
+
+- **操作系统**：Ubuntu 20.04+ 或 CentOS 7+
+- **内存**：最低 1GB，推荐 2GB+
+- **存储**：至少 5GB 可用空间
+- **网络**：开放 80 和 443 端口
+
+### 必要软件
 
 ```bash
-# Ubuntu/Debian
-sudo apt update && sudo apt upgrade -y
-
-# CentOS/RHEL
-sudo yum update -y
-```
-
-#### 安装基础软件
-
-```bash
-# Ubuntu/Debian
-sudo apt install -y curl wget git vim htop nginx
-
-# CentOS/RHEL
-sudo yum install -y curl wget git vim htop nginx
-```
-
-#### 安装 Node.js
-
-```bash
-# 使用 NodeSource 仓库安装 Node.js 18
+# 安装 Node.js 18+
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# 验证安装
-node --version
-npm --version
-```
+# 安装 Nginx
+sudo apt-get install -y nginx
 
-#### 安装 PM2
-
-```bash
+# 安装 PM2
 sudo npm install -g pm2
+
+# 安装 Git
+sudo apt-get install -y git
 ```
 
-### 2. 环境配置
-
-#### 创建应用目录
+### SSH 配置（本地编译模式）
 
 ```bash
-sudo mkdir -p /var/www/stock-info-collector
-sudo chown $USER:$USER /var/www/stock-info-collector
+# 生成 SSH 密钥
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+# 复制公钥到服务器
+ssh-copy-id ubuntu@your-server-ip
 ```
 
-#### 配置环境变量
+## 部署步骤
+
+### 首次部署
+
+1. **克隆项目**
 
 ```bash
-# 创建环境变量文件
-cat > /var/www/stock-info-collector/.env << EOF
+git clone https://github.com/MaelWeb/stock-info-collector.git
+cd stock-info-collector
+```
+
+2. **选择部署模式**
+
+   **本地编译模式：**
+
+   ```bash
+   ./scripts/quick-deploy.sh --local-build
+   ```
+
+   **服务器编译模式：**
+
+   ```bash
+   ./scripts/quick-deploy.sh --server-build
+   ```
+
+3. **按提示配置**
+
+   - 输入服务器 IP 地址
+   - 选择域名配置方式
+   - 确认配置信息
+
+4. **等待部署完成**
+   - 脚本会自动执行所有部署步骤
+   - 完成后显示访问信息
+
+### 后续更新
+
+```bash
+# 使用更新脚本（推荐）
+./scripts/update-deploy.sh
+
+# 或者使用完整部署脚本（会保护配置）
+./scripts/quick-deploy.sh --server-build
+```
+
+## 配置管理
+
+### 环境变量
+
+配置文件位置：`/var/www/stock-info-collector/.env`
+
+**重要配置项：**
+
+```bash
 # 数据库配置
 DATABASE_URL="file:./dev.db"
 
-# JWT配置
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+# JWT 配置
+JWT_SECRET="your-secret-key"
 JWT_EXPIRES_IN="7d"
 
 # 服务器配置
@@ -168,518 +232,242 @@ NODE_ENV=production
 
 # 跨域配置
 CORS_ORIGIN="https://your-domain.com"
-
-# 日志配置
-LOG_LEVEL="info"
-EOF
 ```
 
-#### 配置防火墙
+### Nginx 配置
+
+配置文件位置：`/etc/nginx/sites-available/stock-info-collector`
+
+**自动配置项：**
+
+- 域名设置
+- 静态文件路径
+- API 代理配置
+- 缓存策略
+
+### 数据库管理
+
+**位置：** `/var/www/stock-info-collector/backend/prisma/dev.db`
+
+**备份命令：**
 
 ```bash
-# Ubuntu/Debian
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw enable
+# 手动备份
+cp /var/www/stock-info-collector/backend/prisma/dev.db /backup/db_$(date +%Y%m%d_%H%M%S).db
 
-# CentOS/RHEL
-sudo firewall-cmd --permanent --add-service=ssh
-sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --reload
+# 使用内置备份脚本
+/var/www/stock-info-collector/backup.sh
 ```
 
-### 3. 应用部署
+## 服务管理
 
-#### 克隆代码
+### PM2 管理
 
 ```bash
-cd /var/www/stock-info-collector
-git clone https://github.com/MaelWeb/stock-info-collector.git .
+# 查看应用状态
+pm2 status
+
+# 查看日志
+pm2 logs stock-info-collector-api
+
+# 重启应用
+pm2 restart stock-info-collector-api
+
+# 停止应用
+pm2 stop stock-info-collector-api
+
+# 删除应用
+pm2 delete stock-info-collector-api
 ```
 
-#### 安装依赖
+### Nginx 管理
 
 ```bash
-# 安装后端依赖
-cd backend
-npm install --production
-
-# 安装前端依赖
-cd ../frontend
-npm install --production
-```
-
-#### 构建前端
-
-```bash
-cd /var/www/stock-info-collector/frontend
-npm run build
-```
-
-#### 数据库初始化
-
-```bash
-cd /var/www/stock-info-collector/backend
-npx prisma generate
-npx prisma db push
-```
-
-#### 创建超级管理员
-
-```bash
-cd /var/www/stock-info-collector/backend
-node create-super-admin-config.js
-```
-
-## 🔧 服务配置
-
-### 1. PM2 配置
-
-```bash
-# 创建 PM2 配置文件
-cat > /var/www/stock-info-collector/ecosystem.config.js << EOF
-module.exports = {
-  apps: [{
-    name: 'stock-info-collector-api',
-    script: './backend/src/index.ts',
-    cwd: '/var/www/stock-info-collector/backend',
-    instances: 1,
-    autorestart: true,
-    watch: false,
-    max_memory_restart: '1G',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 3000
-    },
-    error_file: '/var/log/pm2/stock-api-error.log',
-    out_file: '/var/log/pm2/stock-api-out.log',
-    log_file: '/var/log/pm2/stock-api-combined.log',
-    time: true
-  }]
-};
-EOF
-
-# 创建日志目录
-sudo mkdir -p /var/log/pm2
-sudo chown $USER:$USER /var/log/pm2
-```
-
-### 2. Nginx 配置
-
-```bash
-# 创建 Nginx 配置文件
-sudo tee /etc/nginx/sites-available/stock-info-collector << EOF
-server {
-    listen 80;
-    server_name your-domain.com www.your-domain.com;
-
-    # 重定向到 HTTPS
-    return 301 https://\$server_name\$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name your-domain.com www.your-domain.com;
-
-    # SSL 配置 (稍后配置)
-    # ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
-    # ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-
-    # 安全头
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
-
-    # 前端静态文件
-    location / {
-        root /var/www/stock-info-collector/frontend/dist;
-        try_files \$uri \$uri/ /index.html;
-
-        # 缓存配置
-        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-            expires 1y;
-            add_header Cache-Control "public, immutable";
-        }
-    }
-
-    # API 代理
-    location /api/ {
-        proxy_pass http://localhost:3000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-        proxy_read_timeout 86400;
-    }
-
-    # 健康检查
-    location /health {
-        proxy_pass http://localhost:3000/health;
-        access_log off;
-    }
-}
-EOF
-
-# 启用站点
-sudo ln -s /etc/nginx/sites-available/stock-info-collector /etc/nginx/sites-enabled/
+# 检查配置
 sudo nginx -t
+
+# 重启服务
+sudo systemctl restart nginx
+
+# 查看状态
+sudo systemctl status nginx
+
+# 查看日志
+sudo tail -f /var/log/nginx/error.log
+```
+
+## 故障排除
+
+### 常见问题
+
+#### 1. PM2 启动失败
+
+**错误：** `Script not found: /var/www/stock-info-collector/backend/backend/src/index.ts`
+
+**解决方案：**
+
+- 检查脚本路径是否正确
+- 确认 `backend/src/index.ts` 文件存在
+- 重新运行部署脚本
+
+#### 2. 数据库连接失败
+
+**错误：** `Database connection failed`
+
+**解决方案：**
+
+- 检查 `.env` 文件中的 `DATABASE_URL`
+- 确认数据库文件权限
+- 运行 `npx prisma db push` 重新初始化
+
+#### 3. 前端构建失败
+
+**错误：** `JavaScript heap out of memory`
+
+**解决方案：**
+
+- 增加 Node.js 内存限制：`export NODE_OPTIONS="--max-old-space-size=4096"`
+- 使用低内存构建脚本
+- 检查服务器内存使用情况
+
+#### 4. Nginx 配置错误
+
+**错误：** `nginx: configuration file test failed`
+
+**解决方案：**
+
+- 检查 Nginx 配置文件语法
+- 确认域名配置正确
+- 检查文件路径是否存在
+
+### 日志查看
+
+```bash
+# PM2 日志
+pm2 logs stock-info-collector-api --lines 100
+
+# Nginx 访问日志
+sudo tail -f /var/log/nginx/access.log
+
+# Nginx 错误日志
+sudo tail -f /var/log/nginx/error.log
+
+# 系统日志
+sudo journalctl -u nginx -f
+```
+
+### 回滚操作
+
+```bash
+# 1. 停止当前服务
+pm2 stop stock-info-collector-api
+
+# 2. 恢复备份
+sudo cp -r /var/www/stock-info-collector.backup.YYYYMMDD_HHMMSS/* /var/www/stock-info-collector/
+
+# 3. 重启服务
+pm2 start stock-info-collector-api
 sudo systemctl restart nginx
 ```
 
-### 3. 启动应用
+## 安全建议
+
+### SSL 证书
 
 ```bash
-cd /var/www/stock-info-collector
-pm2 start ecosystem.config.js
-pm2 save
-pm2 startup
+# 安装 Certbot
+sudo apt-get install -y certbot python3-certbot-nginx
+
+# 获取 SSL 证书
+sudo certbot --nginx -d your-domain.com
+
+# 自动续期
+sudo crontab -e
+# 添加：0 12 * * * /usr/bin/certbot renew --quiet
 ```
 
-## 🔒 SSL 证书配置
-
-### 1. 安装 Certbot
+### 防火墙配置
 
 ```bash
-# Ubuntu/Debian
-sudo apt install -y certbot python3-certbot-nginx
+# 安装 UFW
+sudo apt-get install -y ufw
 
-# CentOS/RHEL
-sudo yum install -y certbot python3-certbot-nginx
+# 配置防火墙规则
+sudo ufw allow ssh
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
 ```
 
-### 2. 获取 SSL 证书
+### 定期备份
 
 ```bash
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+# 设置自动备份
+sudo crontab -e
+# 添加：0 2 * * * /var/www/stock-info-collector/backup.sh
 ```
 
-### 3. 自动续期
+## 性能优化
+
+### 前端优化
+
+- 启用 Gzip 压缩
+- 配置静态资源缓存
+- 使用 CDN 加速
+
+### 后端优化
+
+- 配置 PM2 集群模式
+- 启用数据库索引
+- 优化 API 响应时间
+
+### 服务器优化
+
+- 调整 Nginx 工作进程数
+- 配置系统内存限制
+- 监控资源使用情况
+
+## 监控和维护
+
+### 健康检查
 
 ```bash
-# 测试自动续期
-sudo certbot renew --dry-run
+# API 健康检查
+curl http://your-domain.com/api/health
 
-# 添加到 crontab
-echo "0 12 * * * /usr/bin/certbot renew --quiet" | sudo crontab -
+# 前端访问测试
+curl -I http://your-domain.com
 ```
 
-## 📊 监控和维护
-
-### 1. 系统监控
+### 性能监控
 
 ```bash
-# 安装监控工具
-sudo apt install -y htop iotop nethogs
-
-# 查看系统状态
+# 查看系统资源
 htop
 df -h
 free -h
+
+# 查看网络连接
+netstat -tlnp
+ss -tlnp
 ```
 
-### 2. 应用监控
+### 定期维护
 
-```bash
-# PM2 监控
-pm2 monit
-pm2 logs
-pm2 status
+- 每周检查日志文件
+- 每月更新系统包
+- 每季度备份数据
+- 每年更新 SSL 证书
 
-# 查看应用状态
-pm2 show stock-info-collector-api
-```
+## 联系支持
 
-### 3. 日志管理
+如果遇到部署问题，请：
 
-```bash
-# 查看 Nginx 日志
-sudo tail -f /var/log/nginx/access.log
-sudo tail -f /var/log/nginx/error.log
-
-# 查看应用日志
-pm2 logs stock-info-collector-api
-```
-
-### 4. 备份策略
-
-```bash
-# 创建备份脚本
-cat > /var/www/stock-info-collector/backup.sh << 'EOF'
-#!/bin/bash
-BACKUP_DIR="/var/backups/stock-info-collector"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# 创建备份目录
-mkdir -p $BACKUP_DIR
-
-# 备份数据库
-cp /var/www/stock-info-collector/backend/prisma/dev.db $BACKUP_DIR/db_$DATE.db
-
-# 备份配置文件
-tar -czf $BACKUP_DIR/config_$DATE.tar.gz /var/www/stock-info-collector/.env /etc/nginx/sites-available/stock-info-collector
-
-# 删除7天前的备份
-find $BACKUP_DIR -name "*.db" -mtime +7 -delete
-find $BACKUP_DIR -name "*.tar.gz" -mtime +7 -delete
-
-echo "Backup completed: $DATE"
-EOF
-
-chmod +x /var/www/stock-info-collector/backup.sh
-
-# 添加到 crontab (每天凌晨2点备份)
-echo "0 2 * * * /var/www/stock-info-collector/backup.sh" | crontab -
-```
-
-## 🔄 更新部署
-
-### 使用本地编译上传模式更新
-
-```bash
-export SERVER_IP=your-server-ip
-./scripts/quick-deploy.sh --local-build
-```
-
-### 使用服务器编译模式更新
-
-```bash
-./scripts/quick-deploy.sh --server-build
-```
-
-### 手动更新步骤
-
-```bash
-# 1. 进入应用目录
-cd /var/www/stock-info-collector
-
-# 2. 拉取最新代码
-git pull origin main
-
-# 3. 安装依赖
-cd backend && npm install --production
-cd ../frontend && npm install --production
-
-# 4. 构建前端
-npm run build
-
-# 5. 数据库迁移
-cd ../backend
-npx prisma generate
-npx prisma db push
-
-# 6. 重启应用
-cd ..
-pm2 restart stock-info-collector-api
-
-# 7. 检查状态
-pm2 status
-```
-
-## 🛠️ 故障排除
-
-### 1. 常见问题
-
-#### 内存不足错误
-
-- 使用本地编译上传模式
-- 增加服务器内存
-- 使用低内存构建脚本
-
-#### SSH 连接失败
-
-- 检查服务器 IP 是否正确
-- 确认 SSH 密钥配置
-- 检查防火墙设置
-
-#### 构建失败
-
-- 检查 Node.js 版本
-- 清理 node_modules 重新安装
-- 检查网络连接
-
-#### 应用无法启动
-
-```bash
-# 检查日志
-pm2 logs stock-info-collector-api
-
-# 检查端口占用
-sudo netstat -tlnp | grep :3000
-
-# 检查环境变量
-cat /var/www/stock-info-collector/.env
-```
-
-#### 数据库连接问题
-
-```bash
-# 检查数据库文件权限
-ls -la /var/www/stock-info-collector/backend/prisma/
-
-# 重新生成数据库
-cd /var/www/stock-info-collector/backend
-npx prisma db push --force-reset
-```
-
-#### Nginx 配置问题
-
-```bash
-# 检查配置语法
-sudo nginx -t
-
-# 查看错误日志
-sudo tail -f /var/log/nginx/error.log
-
-# 重启 Nginx
-sudo systemctl restart nginx
-```
-
-### 2. 性能优化
-
-#### 启用 Gzip 压缩
-
-```bash
-# 在 Nginx 配置中添加
-gzip on;
-gzip_vary on;
-gzip_min_length 1024;
-gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
-```
-
-#### 启用缓存
-
-```bash
-# 在 Nginx 配置中添加
-location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
-```
-
-### 3. 安全加固
-
-#### 防火墙配置
-
-```bash
-# 只开放必要端口
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow ssh
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw enable
-```
-
-#### 定期安全更新
-
-```bash
-# 添加到 crontab
-echo "0 3 * * 0 /usr/bin/apt update && /usr/bin/apt upgrade -y" | sudo crontab -
-```
-
-## 📜 脚本说明
-
-### quick-deploy.sh
-
-主部署脚本，支持两种模式：
-
-- `--local-build`: 本地编译上传模式
-- `--server-build`: 服务器编译模式
-- `--help`: 显示帮助信息
-
-### deploy-server.sh
-
-服务器端部署脚本，用于处理部署包：
-
-- 接受部署包路径作为参数
-- 解压部署包
-- 安装依赖
-- 配置服务
-
-### 脚本使用方法
-
-#### 显示帮助信息
-
-```bash
-./scripts/quick-deploy.sh --help
-./scripts/deploy-server.sh --help
-```
-
-#### 本地编译上传模式
-
-```bash
-export SERVER_IP=your-server-ip
-./scripts/quick-deploy.sh --local-build
-```
-
-#### 服务器编译模式
-
-```bash
-./scripts/quick-deploy.sh --server-build
-```
-
-## 📞 技术支持
-
-### 联系信息
-
-- **项目维护者**: [Your Name]
-- **邮箱**: [your-email@example.com]
-- **GitHub**: [https://github.com/MaelWeb/stock-info-collector]
-
-### 日志文件位置
-
-- **应用日志**: `/var/log/pm2/`
-- **Nginx 日志**: `/var/log/nginx/`
-- **系统日志**: `/var/log/syslog`
-
-### 重要文件位置
-
-- **应用目录**: `/var/www/stock-info-collector/`
-- **配置文件**: `/var/www/stock-info-collector/.env`
-- **Nginx 配置**: `/etc/nginx/sites-available/stock-info-collector`
-- **PM2 配置**: `/var/www/stock-info-collector/ecosystem.config.js`
-
-## 🔄 备份和恢复
-
-### 自动备份
-
-部署脚本会自动备份现有部署到：
-
-```
-/var/www/stock-info-collector.backup.YYYYMMDD_HHMMSS/
-```
-
-### 手动备份
-
-```bash
-# 备份数据库
-cp /var/www/stock-info-collector/backend/prisma/dev.db backup.db
-
-# 备份配置文件
-tar -czf config-backup.tar.gz /var/www/stock-info-collector/.env
-```
-
-### 恢复部署
-
-```bash
-# 停止服务
-pm2 stop stock-info-collector-api
-
-# 恢复备份
-sudo cp -r /var/www/stock-info-collector.backup.YYYYMMDD_HHMMSS/* /var/www/stock-info-collector/
-
-# 重启服务
-pm2 start stock-info-collector-api
-```
+1. 查看相关日志文件
+2. 检查系统资源使用情况
+3. 确认配置文件正确性
+4. 参考故障排除章节
+5. 提交 Issue 到 GitHub 仓库
 
 ---
 
-**注意**: 请根据实际情况修改域名、邮箱等配置信息。
+**注意：** 本指南基于最新的部署脚本编写，请确保使用最新版本的脚本进行部署。
